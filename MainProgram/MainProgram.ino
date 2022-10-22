@@ -237,10 +237,10 @@ void drawInstructions() {
 }
 
 void menuItem1() {  // Function executes when you select the 2nd item from main menu
+  int turnBack = 0;
   int activeButton = 0;
-  int button;
  
-  while(activeButton == 0) {
+  while(turnBack == 0) {
     int hasil = digitalRead(IRsensor);
 
     lcd.clear();
@@ -259,24 +259,10 @@ void menuItem1() {  // Function executes when you select the 2nd item from main 
       //lcd.clear();    
       lcd.setCursor(3, 1);
       lcd.print("Aman");
-    }
-
-    readKey = analogRead(0);
-    if (readKey < 790) {
-      delay(100);
-      readKey = analogRead(0);
-    }
-    
-    button = evaluateButton(readKey);
-    switch (button) {
-      case 4:  // This case will execute if the "back" button is pressed
-        button = 0;
-        activeButton = 1;
-        break;
     }         
       //delay(250);
   }
-
+  
   while (activeButton == 0) {
     int button;
     readKey = analogRead(0);
