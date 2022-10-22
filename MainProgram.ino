@@ -2,11 +2,12 @@
 #include <LiquidCrystal.h>
 #include <Stepper.h>
 
-byte IRsensor = 19;
-String menuItems[] = {"ITEM 1", "ITEM 2", "ITEM 3"};
+int IRsensor = 19;
+String menuItems[] = { "START SUNTIK", "SPEED", "DELAY" };
 
 // Variabel stepper
 int langkah = 200;
+int Speed =100;
 
 // Variabel NavBar
 int readKey;
@@ -17,49 +18,49 @@ int menuPage = 0;
 int maxMenuPages = round(((sizeof(menuItems) / sizeof(String)) / 2) + .5);
 int cursorPosition = 0;
 
+LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+Stepper nema17(langkah, 1, 2, 3, 18);  // Step per rev = 200
+
 // Creates 3 custom characters for the menu display
 byte downArrow[8] = {
-  0b00100, //   *
-  0b00100, //   *
-  0b00100, //   *
-  0b00100, //   *
-  0b00100, //   *
-  0b10101, // * * *
-  0b01110, //  ***
-  0b00100  //   *
+  0b00100,  //   *
+  0b00100,  //   *
+  0b00100,  //   *
+  0b00100,  //   *
+  0b00100,  //   *
+  0b10101,  // * * *
+  0b01110,  //  ***
+  0b00100   //   *
 };
 
 byte upArrow[8] = {
-  0b00100, //   *
-  0b01110, //  ***
-  0b10101, // * * *
-  0b00100, //   *
-  0b00100, //   *
-  0b00100, //   *
-  0b00100, //   *
-  0b00100  //   *
+  0b00100,  //   *
+  0b01110,  //  ***
+  0b10101,  // * * *
+  0b00100,  //   *
+  0b00100,  //   *
+  0b00100,  //   *
+  0b00100,  //   *
+  0b00100   //   *
 };
 
 byte menuCursor[8] = {
-  B01000, //  *
-  B00100, //   *
-  B00010, //    *
-  B00001, //     *
-  B00010, //    *
-  B00100, //   *
-  B01000, //  *
-  B00000  //
+  B01000,  //  *
+  B00100,  //   *
+  B00010,  //    *
+  B00001,  //     *
+  B00010,  //    *
+  B00100,  //   *
+  B01000,  //  *
+  B00000   //
 };
 
-LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
-Stepper nema17(200,1,2,3,18); // Step per rev = 200
 
-void setup()
-{
+void setup() {
   Serial.begin(9600);
   pinMode(IRsensor, INPUT);
 
-  nema17.setSpeed(100); // 100 rpm
+  nema17.setSpeed(Speed);  // 100 rpm
 
   // Initializes and clears the LCD screen
   lcd.begin(16, 2);
@@ -69,23 +70,13 @@ void setup()
   lcd.createChar(0, menuCursor);
   lcd.createChar(1, upArrow);
   lcd.createChar(2, downArrow);
-
 }
 
-void loop()
-{
+void loop() {
   mainMenuDraw();
   drawCursor();
   operateMainMenu();
-  int hasil = digitalRead(IRsensor);
-           if (hasil == LOW)
-           {
-                Serial.println("Ada Halangan");
-                nema17.step(langkah);
-           } else if (hasil == HIGH) {
-                Serial.println("Aman, Tidak Ada Halangan");
-           }
-   delay(250);
+  
 }
 
 // This function will generate the 2 menu items that can fit on the screen. They will change as you scroll through your menu. Up and down arrows will indicate your current menu position.
@@ -113,7 +104,7 @@ void mainMenuDraw() {
 
 // When called, this function will erase the current cursor and redraw it based on the cursorPosition and menuPage variables.
 void drawCursor() {
-  for (int x = 0; x < 2; x++) {     // Erases current cursor
+  for (int x = 0; x < 2; x++) {  // Erases current cursor
     lcd.setCursor(0, x);
     lcd.print(" ");
   }
@@ -154,11 +145,11 @@ void operateMainMenu() {
     }
     button = evaluateButton(readKey);
     switch (button) {
-      case 0: // When button returns as 0 there is no action taken
+      case 0:  // When button returns as 0 there is no action taken
         break;
       case 1:  // This case will execute if the "forward" button is pressed
         button = 0;
-        switch (cursorPosition) { // The case that is selected here is dependent on which menu page you are on and where the cursor is.
+        switch (cursorPosition) {  // The case that is selected here is dependent on which menu page you are on and where the cursor is.
           case 0:
             menuItem1();
             break;
@@ -222,13 +213,13 @@ void operateMainMenu() {
 int evaluateButton(int x) {
   int result = 0;
   if (x < 50) {
-    result = 1; // right
+    result = 1;  // right
   } else if (x < 195) {
-    result = 2; // up
+    result = 2;  // up
   } else if (x < 380) {
-    result = 3; // down
+    result = 3;  // down
   } else if (x < 790) {
-    result = 4; // left
+    result = 4;  // left
   }
   return result;
 }
@@ -237,22 +228,40 @@ int evaluateButton(int x) {
 // menus to make things a little more simplified. If you don't have common instructions or verbage on multiple menus
 // I would just delete this void. You must also delete the drawInstructions()function calls from your sub menu functions.
 void drawInstructions() {
-  lcd.setCursor(0, 1); // Set cursor to the bottom line
+  lcd.setCursor(0, 1);  // Set cursor to the bottom line
   lcd.print("Use ");
-  lcd.write(byte(1)); // Up arrow
+  lcd.write(byte(1));  // Up arrow
   lcd.print("/");
-  lcd.write(byte(2)); // Down arrow
+  lcd.write(byte(2));  // Down arrow
   lcd.print(" buttons");
 }
 
-void menuItem1() { // Function executes when you select the 2nd item from main menu
+void menuItem1() {  // Function executes when you select the 2nd item from main menu
   int activeButton = 0;
-
-  lcd.clear();
+  
+  while(activeButton == 0) {
+  int hasil = digitalRead(IRsensor);
+               lcd.clear();
   lcd.setCursor(3, 0);
-  lcd.print("Sub Menu 2");
-  lcd.setCursor(4, 1);
-  lcd.print("motor");
+  lcd.print("READY...");
+         if (hasil == LOW) {
+          Serial.println("Ada Halangan");
+          lcd.setCursor(3, 1);
+          lcd.print("SIAP SUNTIK");
+
+          // Stepper running
+          nema17.step(langkah);
+       
+        } else if (hasil == HIGH) {
+          Serial.println("Aman, Tidak Ada Halangan");
+          //lcd.clear();    
+          lcd.setCursor(3, 1);
+          lcd.print("Aman");
+        }
+
+          
+      //delay(250);
+  }
 
   while (activeButton == 0) {
     int button;
@@ -271,12 +280,12 @@ void menuItem1() { // Function executes when you select the 2nd item from main m
   }
 }
 
-void menuItem2() { // Function executes when you select the 2nd item from main menu
+void menuItem2() {  // Function executes when you select the 2nd item from main menu
   int activeButton = 0;
 
   lcd.clear();
-  lcd.setCursor(3, 0);
-  lcd.print("Sub Menu 2");
+  lcd.setCursor(1, 0);
+  lcd.print("KECEPATAN SUNTIK");
 
   while (activeButton == 0) {
     int button;
@@ -295,7 +304,7 @@ void menuItem2() { // Function executes when you select the 2nd item from main m
   }
 }
 
-void menuItem3() { // Function executes when you select the 3rd item from main menu
+void menuItem3() {  // Function executes when you select the 3rd item from main menu
   int activeButton = 0;
 
   lcd.clear();
@@ -318,5 +327,3 @@ void menuItem3() { // Function executes when you select the 3rd item from main m
     }
   }
 }
-
-
