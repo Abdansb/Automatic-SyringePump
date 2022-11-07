@@ -7,7 +7,7 @@ String menuItems[] = { "START SUNTIK", "SPEED", "DELAY" };
 
 // Variabel stepper
 int langkah = 200;
-int Speed =100;
+int Speed = 60;
 
 // Variabel NavBar
 int readKey;
@@ -19,7 +19,7 @@ int maxMenuPages = round(((sizeof(menuItems) / sizeof(String)) / 2) + .5);
 int cursorPosition = 0;
 
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
-Stepper nema17(langkah, 1, 2, 3, 18);  // Step per rev = 200
+Stepper nema17(langkah, 2, 3, 11, 12);  // Step per rev = 200
 
 // Creates 3 custom characters for the menu display
 byte downArrow[8] = {
@@ -237,39 +237,37 @@ void drawInstructions() {
 }
 
 void menuItem1() {  // Function executes when you select the 2nd item from main menu
-  int turnBack = 0;
   int activeButton = 0;
- 
-  while(turnBack == 0) {
-    int hasil = digitalRead(IRsensor);
+  int button;
 
-    lcd.clear();
+  while (activeButton == 0) {
+    int hasil = digitalRead(IRsensor);    
+    readKey = analogRead(0);
+    lcd.clear();    
     lcd.setCursor(3, 0);
     lcd.print("READY...");
     if (hasil == LOW) {
-      Serial.println("Ada Halangan");
-      lcd.setCursor(3, 1);
-      lcd.print("SIAP SUNTIK");
-      
-      // Stepper running
-      nema17.step(langkah);
-    }   
-    else if (hasil == HIGH) {
-      Serial.println("Aman, Tidak Ada Halangan");
-      //lcd.clear();    
-      lcd.setCursor(3, 1);
-      lcd.print("Aman");
-    }         
-      //delay(250);
-  }
-  
-  while (activeButton == 0) {
-    int button;
-    readKey = analogRead(0);
+        Serial.println("Ada Halangan");
+        lcd.setCursor(3, 1);
+        lcd.print("SIAP SUNTIK");
+        delay(100);
+        // Stepper running
+        nema17.step(200);
+        delay(100);
+        nema17.step(-200);
+    } else if (hasil == HIGH) {
+        Serial.println("Aman, Tidak Ada Halangan");
+        //lcd.clear();    
+        lcd.setCursor(3, 1);
+        lcd.print("Aman");
+    }     
+delay(100);
+
     if (readKey < 790) {
-      delay(100);
-      readKey = analogRead(0);
+        //delay(100);
+        readKey = analogRead(0);
     }
+
     button = evaluateButton(readKey);
     switch (button) {
       case 4:  // This case will execute if the "back" button is pressed
@@ -279,6 +277,7 @@ void menuItem1() {  // Function executes when you select the 2nd item from main 
     }
   }
 }
+
 
 void menuItem2() {  // Function executes when you select the 2nd item from main menu
   int activeButton = 0;
