@@ -6,8 +6,9 @@ int IRsensor = 19;
 String menuItems[] = { "START SUNTIK", "SPEED", "DELAY" };
 
 // Variabel stepper
-int langkah = 200;
+const int langkah = 200; // Tetap, per rotasi 1.8 x 200 = 360
 int Speed = 60;
+int putaran = 3;
 
 // Variabel NavBar
 int readKey;
@@ -239,6 +240,7 @@ void drawInstructions() {
 void menuItem1() {  // Function executes when you select the 2nd item from main menu
   int activeButton = 0;
   int button;
+  int hitungAyam = 0;
 
   while (activeButton == 0) {
     int hasil = digitalRead(IRsensor);    
@@ -247,16 +249,17 @@ void menuItem1() {  // Function executes when you select the 2nd item from main 
     lcd.setCursor(3, 0);
     lcd.print("READY...");
     if (hasil == LOW) {
-        Serial.println("Ada Halangan");
+        //Serial.println("Ada Halangan");
         lcd.setCursor(3, 1);
-        lcd.print("SIAP SUNTIK");
+        lcd.print(hitungAyam);
         delay(100);
         // Stepper running
-        nema17.step(200);
+        nema17.step(langkah*putaran);
         delay(100);
-        nema17.step(-200);
+        nema17.step(-langkah*putaran);
+        hitungAyam += 1;        
     } else if (hasil == HIGH) {
-        Serial.println("Aman, Tidak Ada Halangan");
+        //Serial.println("Aman, Tidak Ada Halangan");
         //lcd.clear();    
         lcd.setCursor(3, 1);
         lcd.print("Aman");
