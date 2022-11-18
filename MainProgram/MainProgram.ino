@@ -7,8 +7,8 @@ String menuItems[] = { "START SUNTIK", "SPEED", "DELAY" };
 
 // Variabel stepper
 const int langkah = 200; // Tetap, per rotasi 1.8 x 200 = 360
-int Speed = 60;
-int putaran = 3;
+int Speed = 90;
+int putaran = 4;
 
 // Variabel NavBar
 int readKey;
@@ -251,19 +251,22 @@ void menuItem1() {  // Function executes when you select the 2nd item from main 
     if (hasil == LOW) {
         //Serial.println("Ada Halangan");
         lcd.setCursor(3, 1);
-        lcd.print(hitungAyam);
+        String stringOne = "Jumlah = ";
+        String stringTwo = stringOne + hitungAyam;
+        lcd.print(stringTwo);
         delay(100);
         // Stepper running
-        nema17.step(langkah*putaran);
-        delay(100);
         nema17.step(-langkah*putaran);
-        hitungAyam += 1;        
+        delay(100);
+        nema17.step(langkah*putaran);
+        hitungAyam += 1;
+        delay(100);        
     } else if (hasil == HIGH) {
         //Serial.println("Aman, Tidak Ada Halangan");
         //lcd.clear();    
         lcd.setCursor(3, 1);
         lcd.print("Aman");
-    }     
+    }    
 delay(100);
 
     if (readKey < 790) {
@@ -286,11 +289,17 @@ void menuItem2() {  // Function executes when you select the 2nd item from main 
   int activeButton = 0;
 
   lcd.clear();
-  lcd.setCursor(1, 0);
+  lcd.setCursor(0, 0);
   lcd.print("KECEPATAN SUNTIK");
+  lcd.setCursor(0, 1);
+
+  lcd.print("");
 
   while (activeButton == 0) {
     int button;
+
+
+
     readKey = analogRead(0);
     if (readKey < 790) {
       delay(100);
